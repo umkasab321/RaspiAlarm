@@ -20,7 +20,7 @@
 DEVICE     = attiny2313
 CLOCK      = 1000000
 PROGRAMMER = -c USBasp -P usb -B4
-OBJECTS    = main.o gpio.o
+OBJECTS    = main.o gpio.o usart.o
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0x24:m
 
 # ATMega8 fuse bits used above (fuse bits for other devices are different!):

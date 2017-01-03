@@ -5,6 +5,7 @@
 #include<ctype.h>
 #include<util/delay.h>
 #include"gpio.h"
+#include"usart.h"
 
 int buffIndex = 0;
 char buffer[20];
@@ -44,18 +45,6 @@ int dig2int(char digit)
 	if('0' <= digit && digit <= '9')return digit - '0';
 	else return 0;
 }
-ISR(USART_RX_vect)
-{
-	char ch = UDR;
-	if(buffIndex > 20 - 1)buffIndex = 0;
-	if('0' <= ch && ch <= '9'){
-		buffer[buffIndex] = ch;
-		buffIndex++;
-	}else if(ch == 'a'){
-		strcpy(LED7segArray,buffer);
-		buffIndex = 0;
-	}
-}
 /* The one's digit is B0.
  * The ten's digit is B1.
  * The hundred's digit is B2.
@@ -66,6 +55,7 @@ ISR(USART_RX_vect)
  */
 int main(void)
 {
+	USARTinit(1200);
 	LED7segArray[0] = '9';
 	LED7segArray[1] = '0';
 	LED7segArray[2] = '4';
@@ -89,20 +79,12 @@ int main(void)
 	setOutH(B,2);
 	setOutH(B,3);
 
-
-	UCSRB = _BV(RXCIE) |_BV(TXEN)|_BV(RXEN);
-
-	UCSRC = 0b00000110;
-
-    UBRRH = 0;
-    UBRRL = 51;    //1MHz1200bps
-
 	sei();
 	while(1){
-
+			showData(LED7segArray);
 			int i = 0;
 			for(i = 0;i<4;i++){
-				dispDigit(dig2int(LED7segArray[3 - i]));
+				dispDigit(dig2int(LED7segArray[i]));
 				setOutL(B,i);
 				_delay_ms(1);
 				setOutH(B,i);
