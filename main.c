@@ -10,7 +10,7 @@ int buffIndex = 0;
 char buffer[20];
 char LED7segArray[20];
 
-void sendBitPortD(int value)
+void sendBitPort(int value)
 {
 		setOutValue(B,4,value);
 		setOutH(B,6);
@@ -35,7 +35,7 @@ void dispDigit(int digit)
 	int j = 0;
 	setOutL(B,5);
 	for(j=0;j<8;j++){
-		sendBitPortD(0b00000001 & ((digits[digit]) >> (7 - j)));
+		sendBitPort(0b00000001 & ((digits[digit]) >> (7 - j)));
 	}
 	setOutH(B,5);
 }
@@ -44,17 +44,9 @@ int dig2int(char digit)
 	if('0' <= digit && digit <= '9')return digit - '0';
 	else return 0;
 }
-void USART_Transmit( unsigned char Data)
-{
-    // 送信バッファが空きになるまで待つ
-    while ( !(UCSRA & _BV(UDRE)) );
-
-    UDR = Data;
-}
 ISR(USART_RX_vect)
 {
 	char ch = UDR;
-	USART_Transmit(ch);
 	if(buffIndex > 20 - 1)buffIndex = 0;
 	if('0' <= ch && ch <= '9'){
 		buffer[buffIndex] = ch;
@@ -98,16 +90,12 @@ int main(void)
 	setOutH(B,3);
 
 
-	UCSRB = _BV(RXCIE) |_BV(TXEN)|_BV(RXEN); /* 送受信受信割り込み許可 */
+	UCSRB = _BV(RXCIE) |_BV(TXEN)|_BV(RXEN);
 
 	UCSRC = 0b00000110;
-     					//　パリなし
-     					//  ストップビット 1ビット
-					    //  データビット 8ビット
 
     UBRRH = 0;
-    UBRRL = 51;    /* 4MHzにて　1200bps　設定 */
-//    UBRRL = 25;    /* 4MHzにて　9600bps　設定 */
+    UBRRL = 51;    //1MHz1200bps
 
 	sei();
 	while(1){
