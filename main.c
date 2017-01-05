@@ -80,6 +80,12 @@ int main(void)
 	setOutH(B,3);
 
 	sei();
+	putChar('b');
+	putChar('h');
+	putChar('e');
+	putChar('L');
+	char str[] = "hello";
+	putString(str);
 	while(1){
 			showData(LED7segArray);
 			int i = 0;

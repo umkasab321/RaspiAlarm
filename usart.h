@@ -4,4 +4,5 @@ void USARTinit(int baudrate);
 void showData(char *dataRegister);
 void indexAdjust();
 void buffClear();
-void rs_putc (char c);
+void putChar (char c);
+void putString(char *s);

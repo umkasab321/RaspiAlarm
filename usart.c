@@ -19,16 +19,23 @@ void USARTinit(int baudrate)
 	buff[2] = 8;
 	buff[3] = 9;
 }
-void rs_putc (char c)
+void putChar (char c)
 {
-    loop_until_bit_is_set(UCSRA, UDRE); //UDREƒrƒbƒg‚ª1‚É‚È‚é‚Ü‚Å‘Ò‚Â
+    loop_until_bit_is_set(UCSRA, UDRE);
     UDR = c;
+}
+void putString(char *s)
+{
+	while(*s){
+		putChar(*s);
+		*(s++);
+	}
 }
 ISR(USART_RX_vect)
 {
 	char ch = UDR;
-	if(ch == '\r')rs_putc('R');
-	else rs_putc(ch);
+	/* if(ch == '\r')rs_putc('R'); */
+	/* else rs_putc(ch); */
 
 	if(ch == '\r' || ch == '\n'){
 		strcpy(buff,rawData);
