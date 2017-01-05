@@ -1,5 +1,6 @@
 #define t2313
 #include <avr/io.h>
+#include "gpio.h"
 
 void setOutput(int port,int pin)
 {

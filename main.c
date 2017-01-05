@@ -56,10 +56,10 @@ int dig2int(char digit)
 int main(void)
 {
 	USARTinit(1200);
-	LED7segArray[0] = '9';
-	LED7segArray[1] = '0';
+	LED7segArray[0] = '5';
+	LED7segArray[1] = '1';
 	LED7segArray[2] = '4';
-	LED7segArray[3] = '7';
+	LED7segArray[3] = '8';
 //GPIO initilize
 	setOutput(B,0);
 	setOutput(B,1);

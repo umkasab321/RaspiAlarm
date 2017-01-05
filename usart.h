@@ -2,3 +2,6 @@
 void USARTinit(int baudrate);
 //引数をポインタ、文字列をコピーしてやる。\nで区切り
 void showData(char *dataRegister);
+void indexAdjust();
+void buffClear();
+void rs_putc (char c);
