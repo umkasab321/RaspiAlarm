@@ -70,12 +70,12 @@ int main(void)
 	setOutput(B,2);
 	setOutput(B,3);
 
-	/* setInput(D,6); */
-	/* setInput(D,4); //ロータリーエンコーダA相 */
-	/* setInput(D,5); //ロータリーエンコーダB相 */
-	/* setPullUp(D,6); */
-	/* setPullUp(D,4); */
-	/* setPullUp(D,5); */
+	setInput(D,6);
+	setInput(D,4); //ロータリーエンコーダA相
+	setInput(D,5); //ロータリーエンコーダB相
+	setPullUp(D,6);//ロータリーのスイッチ
+	setPullUp(D,4);
+	setPullUp(D,5);
 
 	setOutput(B,4); //SER/DS シリアルデータ入力
 	setOutput(B,5); //RCK/STCP 立ち上がり時に出力
@@ -93,47 +93,51 @@ int main(void)
 
 	sei();
 	DEBUG_PRINT("Heeeeeeeeeelo\r\n");
-	/* int count = 0; */
-	/* int encCount[5] = {0,0,0,0,0}; //[encCount,D4flg,D5flg,D4Data,D5Data] */
-	/* int preData = 0; */
-	/* int encData = 0; */
+	int count = 0;
+	int mode = 0; //0時計 1アラーム時刻 2アラーム設定
+	int encCount[5] = {0,0,0,0,0}; //[encCount,D4flg,D5flg,D4Data,D5Data]
+	int alarmTime[4] = {0,0,0,0};
+	int preData = 0;
+	int encData = 0;
 	while(2){
-		showData(LED7segArray);
+		/* if(mode == 0) showData(LED7segArray); */
+		/* else if(mode == 1) showData(LED7segArray); */
 		int i = 0;
 		for(i = 0;i<4;i++){
 			dispDigit(dig2int(LED7segArray[i]));
 			setOutL(B,i);
+			_delay_ms(2);
 			setOutH(B,i);
 		}
 
-		/* int getENCdir = 0; */
-		/* int chatterCounter = 0; */
-		/* int encDatacpy = 1; */
-		/* while(chatterCounter < 5){ */
-		/* 	encData = !showInput(D,4) * 2 + !showInput(D,5); */
-		/* 	if(encDatacpy == encData)chatterCounter++; */
-		/* 	else chatterCounter--; */
-		/* 	encDatacpy = encData; */
-		/* } */
-		/* if(preData != encData){ */
-		/* 	getENCdir = (preData << 1) ^ encData; */
-		/* 	if((getENCdir & 0b10) >> 1)encCount[0]++; */
-		/* 	else encCount[0]--; */
-		/* }else{ */
-		/* 	if(encData == 0){ */
-		/* 		if(encCount[0] % 4 != 0){ */
-		/* 			if(encCount[0] > 0) encCount[0] += 4 - (encCount[0] % 4); */
-		/* 			else if(encCount[0] < 0) encCount[0] -= (encCount[0] % 4); */
-		/* 		} */
-		/* 	} */
-		/* } */
-		/* preData = encData; */
-        /*  */
-		/* if(count % 100 == 1){ */
-		/* 	putInteger(encCount[0]); */
-		/* 	DEBUG_PRINT(","); */
-		/* 	DEBUG_PRINT("\r\n"); */
-		/* } */
-		/* count >= 100 ? (count = 0) : (count++); */
+		int getENCdir = 0;
+		int chatterCounter = 0;
+		int encDatacpy = 1;
+		while(chatterCounter < 5){
+			encData = !showInput(D,4) * 2 + !showInput(D,5);
+			if(encDatacpy == encData)chatterCounter++;
+			else chatterCounter--;
+			encDatacpy = encData;
+		}
+		if(preData != encData){
+			getENCdir = (preData << 1) ^ encData;
+			if((getENCdir & 0b10) >> 1)encCount[0]++;
+			else encCount[0]--;
+		}else{
+			if(encData == 0){
+				if(encCount[0] % 4 != 0){
+					if(encCount[0] > 0) encCount[0] += 4 - (encCount[0] % 4);
+					else if(encCount[0] < 0) encCount[0] -= (encCount[0] % 4);
+				}
+			}
+		}
+		preData = encData;
+
+		if(count % 100 == 1){
+			putInteger(encCount[0]);
+			DEBUG_PRINT(",");
+			DEBUG_PRINT("\r\n");
+		}
+		count >= 100 ? (count = 0) : (count++);
 	}
 }
