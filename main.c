@@ -1,5 +1,6 @@
 #include<avr/io.h>
 #include<avr/interrupt.h>
+#include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<ctype.h>
@@ -7,9 +8,7 @@
 #include"gpio.h"
 #include"usart.h"
 
-int buffIndex = 0;
-char buffer[20];
-char LED7segArray[20];
+char LED7segArray[10];
 
 void sendBitPort(int value)
 {
@@ -45,6 +44,11 @@ int dig2int(char digit)
 	if('0' <= digit && digit <= '9')return digit - '0';
 	else return 0;
 }
+char int2dig(char digit)
+{
+	if(0 <= digit && digit <= 9)return digit + '0';
+	else return 0;
+}
 /* The one's digit is B0.
  * The ten's digit is B1.
  * The hundred's digit is B2.
@@ -66,6 +70,13 @@ int main(void)
 	setOutput(B,2);
 	setOutput(B,3);
 
+	setInput(D,6);
+	setInput(D,4); //ロータリーエンコーダA相
+	setInput(D,5); //ロータリーエンコーダB相
+	setPullUp(D,6);
+	setPullUp(D,4);
+	setPullUp(D,5);
+
 	setOutput(B,4); //SER/DS シリアルデータ入力
 	setOutput(B,5); //RCK/STCP 立ち上がり時に出力
 	setOutput(B,6); //SCK/SHCP 立ち上がり時のデータを記録
@@ -74,26 +85,90 @@ int main(void)
 	setOutL(B,5);
 	setOutL(B,6);
 
+
 	setOutH(B,0);
 	setOutH(B,1);
 	setOutH(B,2);
 	setOutH(B,3);
 
 	sei();
-	putChar('b');
-	putChar('h');
-	putChar('e');
-	putChar('L');
-	char str[] = "hello";
-	putString(str);
-	while(1){
-			showData(LED7segArray);
-			int i = 0;
-			for(i = 0;i<4;i++){
-				dispDigit(dig2int(LED7segArray[i]));
-				setOutL(B,i);
-				_delay_ms(1);
-				setOutH(B,i);
+	/* char str[] = "hello"; */
+	/* putString(str); */
+	/* char str[20]; */
+	/* sprintf(str,"aaaHello\n"); */
+	/* putString(str); */
+	/* sprintf(str,"He%delo\r\n",3); */
+	/* sprintf(str,"Heelo\r\n"); */
+	/* putString(str); */
+	/* DEBUG_PRINT("Hello%dWorld!\r\n",3); */
+	DEBUG_PRINT("Heeeeeeeeeelo\r\n");
+	putInteger(6789);
+	int count = 0;
+	int D4flg = 0;
+	int encCount[5] = {0,0,0,0,0}; //[encCount,D4flg,D5flg,D4Data,D5Data]
+	int preData = 0;
+	int encData = 0;
+	int encFlg= 0;
+	int preEncFlg= 0;
+	int sameDataCount = 0;
+	while(2){
+		/* showData(LED7segArray); */
+		/* int i = 0; */
+		/* for(i = 0;i<4;i++){ */
+		/* 	dispDigit(dig2int(LED7segArray[i])); */
+		/* 	setOutL(B,i); */
+		/* 	setOutH(B,i); */
+		/* } */
+
+		int getENCdir = 0;
+		int chatterCounter = 0;
+		int encDatacpy = 1;
+		_delay_ms(5);
+		while(chatterCounter < 5){
+			encData = !showInput(D,4) * 2 + !showInput(D,5);
+			if(encDatacpy == encData)chatterCounter++;
+			else chatterCounter--;
+			encDatacpy = encData;
+		}
+		if(preData != encData){
+			sameDataCount = 0;
+			getENCdir = (preData << 1) ^ encData;
+			encFlg = (getENCdir & 0b10) >> 1;
+			/* if(encFlg == 0)encFlg = -1; */
+			if((getENCdir & 0b10) >> 1)encCount[0]++;
+			else encCount[0]--;
+			/* if(encFlg > preEncFlg)encCount[0]++; */
+			/* else if(encFlg < preEncFlg)encCount[0]--; */
+			/* preEncFlg = encFlg; */
+		}else{
+			if(encData == 0){
+				if(encCount[0] % 4 != 0){
+					if(encCount[0] > 0) encCount[0] += 4 - (encCount[0] % 4);
+					else if(encCount[0] < 0) encCount[0] -= (encCount[0] % 4);
+				}
 			}
+		}
+		preData = encData;
+
+		if(count % 100 == 1){
+			/* putChar('('); */
+			/* putInteger(showInput(D,4)); */
+			/* DEBUG_PRINT(","); */
+			/* putInteger(showInput(D,5)); */
+			/* putChar(')'); */
+			/* DEBUG_PRINT("\r\n"); */
+			putInteger(encCount[0]);
+			DEBUG_PRINT(",");
+			putInteger(sameDataCount);
+			DEBUG_PRINT("\r\n");
+		}
+		/* int dataD4 = 0; */
+		/* int dataD5 = 0; */
+		/* dataD4 = showInput(D,4); */
+		/* dataD5 = showInput(D,5); */
+		/* if(encCount[1] == 0 && dataD4 == 1 && dataD5 == 0)encCount[0]++; */
+		/* if(encCount[1] == 0 && dataD4 == 1 && dataD5 == 1)encCount[0]--; */
+		/* encCount[1] = dataD4; */
+		count >= 100 ? (count = 0) : (count++);
 	}
 }

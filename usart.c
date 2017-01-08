@@ -1,8 +1,11 @@
 #include "usart.h"
+#include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
 #include<avr/interrupt.h>
 char rawData[BUFF_NUMBER];
 char buff[BUFF_NUMBER];
+char sendbuff[BUFF_NUMBER];
 int lastIndex;
 void USARTinit(int baudrate)
 {
@@ -18,6 +21,7 @@ void USARTinit(int baudrate)
 	buff[1] = 7;
 	buff[2] = 8;
 	buff[3] = 9;
+
 }
 void putChar (char c)
 {
@@ -31,11 +35,15 @@ void putString(char *s)
 		*(s++);
 	}
 }
+void putInteger(unsigned long value){
+	char valueString[20];
+	putString(itoa(value,valueString,10));
+}
 ISR(USART_RX_vect)
 {
 	char ch = UDR;
-	/* if(ch == '\r')rs_putc('R'); */
-	/* else rs_putc(ch); */
+	/* if(ch == '\r')putChar('R'); */
+	/* else putChar(ch); */
 
 	if(ch == '\r' || ch == '\n'){
 		strcpy(buff,rawData);

@@ -31,7 +31,8 @@ void setInput(int port,int pin)
 		DDRD &= ~(1 << pin);
 	}
 }
-void setOutValue(int port,int pin,int value){
+void setOutValue(int port,int pin,int value)
+{
 	if(value){
 		setOutH(port,pin);
 	}else{
