@@ -100,36 +100,34 @@ int main(void)
 	DEBUG_PRINT("Heeeeeeeeeelo\r\n");
 	int count = 0;
 	int mode = 0; //0時計 1アラーム設定h1 2アラーム設定h2 3アラーム設定m1 4アラーム設定m2 5アラーム時刻
-	int encCount[5] = {0,0,0,0,0}; //[encCount,D4flg,D5flg,D4Data,D5Data]
-	int alarmTime[4] = {0,0,0,0};
-	int chikachika[4] = {0,0,0,0};
+	uint8_t encCount[5] = {0,0,0,0,0}; //[encCount,D4flg,D5flg,D4Data,D5Data]
+	uint8_t alarmTime[4] = {0,0,0,0};
+	uint8_t chikachika[4] = {0,0,0,0};
 	int pushSwitchFlg = 0;
 	int preData = 0;
 	int encData = 0;
+	uint8_t tempAlarmTime = 0;
 	while(2){
 		/* if(mode == 0) showData(LED7segArray); */
 		/* else if(mode == 1) showData(LED7segArray); */
 		if(mode == 0){
-			LED7segArray[0] = 5;
-			LED7segArray[1] = 1;
-			LED7segArray[2] = 6;
-			LED7segArray[3] = 3;
+			LED7segArray[0] = '4';
+			LED7segArray[1] = '1';
+			LED7segArray[2] = '5';
+			LED7segArray[3] = '8';
 		}else if(1 <=mode  && mode <= 5){
-			/* LED7segArray[0] = alarmTime[0]; */
-			/* LED7segArray[1] = alarmTime[1]; */
-			/* LED7segArray[2] = alarmTime[2]; */
-			/* LED7segArray[3] = alarmTime[3]; */
+			LED7segArray[0] = '0' + alarmTime[0];
+			LED7segArray[1] = '0' + alarmTime[1];
+			LED7segArray[2] = '0' + alarmTime[2];
+			LED7segArray[3] = '0' + alarmTime[3];
 		}
 		if(1 <=mode  && mode <= 4){
-			/* LED7segArray[mode - 1] = alarmTime[mode - 1] + encCount[0] / 4; */
-			/* LED7segArray[mode - 1] = 3; */
+			int maxDigit[] = {2,9,5,9};
+			tempAlarmTime = (alarmTime[mode - 1] + encCount[0] / 4) % (maxDigit[mode - 1] + 1);
+			LED7segArray[mode - 1] = '0' + tempAlarmTime;
 		}
 		int i = 0;
 		for(i = 0;i<4;i++){
-			LED7segArray[0] = 5;
-			LED7segArray[1] = 1;
-			LED7segArray[2] = 6;
-			LED7segArray[3] = 3;
 			dispDigit(dig2int(LED7segArray[i]));
 			if(!chikachika[i]){
 				setOutH(B,i);
@@ -141,7 +139,7 @@ int main(void)
 		int getENCdir = 0;
 		int chatterCounter = 0;
 		int encDatacpy = 1;
-		
+
 		while(chatterCounter < 5){
 			encData = !showInput(D,4) * 2 + !showInput(D,5);
 			if(encDatacpy == encData)chatterCounter++;
@@ -166,6 +164,10 @@ int main(void)
 		if(pushSwitchFlg == 0 && !showInput(D,6))
 		{
 			pushSwitchFlg = 1;
+			if(1 <= mode && mode <= 4){
+				alarmTime[mode - 1] = tempAlarmTime;
+			}
+			tempAlarmTime=0;
 			mode++;
 			encCount[0] = 0;
 		}
