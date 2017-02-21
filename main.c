@@ -57,7 +57,7 @@ char int2dig(char digit)
  * RCK/STCP is D3.
  * SCK/SHCP is D4.
  */
-int main(void)
+void init()
 {
 	USARTinit(1200);
 	LED7segArray[0] = '5';
@@ -91,28 +91,57 @@ int main(void)
 	setOutH(B,2);
 	setOutH(B,3);
 
+
+}
+int main(void)
+{
+	init();
 	sei();
 	DEBUG_PRINT("Heeeeeeeeeelo\r\n");
 	int count = 0;
-	int mode = 0; //0時計 1アラーム時刻 2アラーム設定
+	int mode = 0; //0時計 1アラーム設定h1 2アラーム設定h2 3アラーム設定m1 4アラーム設定m2 5アラーム時刻
 	int encCount[5] = {0,0,0,0,0}; //[encCount,D4flg,D5flg,D4Data,D5Data]
 	int alarmTime[4] = {0,0,0,0};
+	int chikachika[4] = {0,0,0,0};
+	int pushSwitchFlg = 0;
 	int preData = 0;
 	int encData = 0;
 	while(2){
 		/* if(mode == 0) showData(LED7segArray); */
 		/* else if(mode == 1) showData(LED7segArray); */
+		if(mode == 0){
+			LED7segArray[0] = 5;
+			LED7segArray[1] = 1;
+			LED7segArray[2] = 6;
+			LED7segArray[3] = 3;
+		}else if(1 <=mode  && mode <= 5){
+			/* LED7segArray[0] = alarmTime[0]; */
+			/* LED7segArray[1] = alarmTime[1]; */
+			/* LED7segArray[2] = alarmTime[2]; */
+			/* LED7segArray[3] = alarmTime[3]; */
+		}
+		if(1 <=mode  && mode <= 4){
+			/* LED7segArray[mode - 1] = alarmTime[mode - 1] + encCount[0] / 4; */
+			/* LED7segArray[mode - 1] = 3; */
+		}
 		int i = 0;
 		for(i = 0;i<4;i++){
+			LED7segArray[0] = 5;
+			LED7segArray[1] = 1;
+			LED7segArray[2] = 6;
+			LED7segArray[3] = 3;
 			dispDigit(dig2int(LED7segArray[i]));
+			if(!chikachika[i]){
+				setOutH(B,i);
+			}
+			_delay_ms(1);
 			setOutL(B,i);
-			_delay_ms(2);
-			setOutH(B,i);
 		}
 
 		int getENCdir = 0;
 		int chatterCounter = 0;
 		int encDatacpy = 1;
+		
 		while(chatterCounter < 5){
 			encData = !showInput(D,4) * 2 + !showInput(D,5);
 			if(encDatacpy == encData)chatterCounter++;
@@ -133,10 +162,35 @@ int main(void)
 		}
 		preData = encData;
 
+		//modeスイッチ
+		if(pushSwitchFlg == 0 && !showInput(D,6))
+		{
+			pushSwitchFlg = 1;
+			mode++;
+			encCount[0] = 0;
+		}
+		if(pushSwitchFlg){
+			pushSwitchFlg++;
+			if(pushSwitchFlg >= 50)pushSwitchFlg=0;
+		}
+		mode = mode % 6;
+
 		if(count % 100 == 1){
-			putInteger(encCount[0]);
+			putInteger(encCount[0] / 4);
 			DEBUG_PRINT(",");
 			DEBUG_PRINT("\r\n");
+		}
+		if(1 <=mode  && mode <= 4){
+			int chikaNum = 0;
+			for(chikaNum = 0; chikaNum < 4;chikaNum++){
+				if(chikaNum == mode - 1 && count % 50 < 25)chikachika[mode - 1]=1;
+				else chikachika[chikaNum]=0;
+			}
+		}else{
+			chikachika[0] = 0;
+			chikachika[1] = 0;
+			chikachika[2] = 0;
+			chikachika[3] = 0;
 		}
 		count >= 100 ? (count = 0) : (count++);
 	}
