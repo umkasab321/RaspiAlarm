@@ -35,7 +35,7 @@ void dispDigit(int digit)
 	int j = 0;
 	setOutL(B,5);
 	for(j=0;j<8;j++){
-		sendBitPort(0b00000001 & ((digits[digit]) >> (7 - j)));
+		sendBitPort(0b00000001 & ((0b11111111 - digits[digit]) >> (7 - j)));
 	}
 	setOutH(B,5);
 }
@@ -60,11 +60,12 @@ char int2dig(char digit)
 void init()
 {
 	USARTinit(1200);
-	LED7segArray[0] = '5';
-	LED7segArray[1] = '1';
-	LED7segArray[2] = '4';
-	LED7segArray[3] = '8';
+	/* LED7segArray[0] = '5'; */
+	/* LED7segArray[1] = '1'; */
+	/* LED7segArray[2] = '4'; */
+	/* LED7segArray[3] = '8'; */
 //GPIO initilize
+	setOutput(D,3);
 	setOutput(B,0);
 	setOutput(B,1);
 	setOutput(B,2);
@@ -111,10 +112,11 @@ int main(void)
 		/* if(mode == 0) showData(LED7segArray); */
 		/* else if(mode == 1) showData(LED7segArray); */
 		if(mode == 0){
-			LED7segArray[0] = '4';
-			LED7segArray[1] = '1';
-			LED7segArray[2] = '5';
-			LED7segArray[3] = '8';
+			/* LED7segArray[0] = '4'; */
+			/* LED7segArray[1] = '1'; */
+			/* LED7segArray[2] = '5'; */
+			/* LED7segArray[3] = '8'; */
+			showData(LED7segArray);
 		}else if(1 <=mode  && mode <= 5){
 			LED7segArray[0] = '0' + alarmTime[0];
 			LED7segArray[1] = '0' + alarmTime[1];
@@ -160,6 +162,8 @@ int main(void)
 		}
 		preData = encData;
 
+		/* if(count >= 50)setOutL(A, 1); */
+		/* else setOutH(A, 0); */
 		//modeスイッチ
 		if(pushSwitchFlg == 0 && !showInput(D,6))
 		{
@@ -177,7 +181,7 @@ int main(void)
 		}
 		mode = mode % 6;
 
-		if(count % 100 == 1){
+		if(mode == 5 && count % 100 == 1){
 			putInteger(encCount[0] / 4);
 			DEBUG_PRINT(",");
 			DEBUG_PRINT("\r\n");

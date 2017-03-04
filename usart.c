@@ -42,12 +42,17 @@ void putInteger(unsigned long value){
 ISR(USART_RX_vect)
 {
 	char ch = UDR;
+	putChar('R');
 	/* if(ch == '\r')putChar('R'); */
 	/* else putChar(ch); */
 
-	if(ch == '\r' || ch == '\n'){
+	if(ch == '\r' || ch == '\n' || ch == 'a'){
 		strcpy(buff,rawData);
-		buffClear();
+		/* buffClear(); */
+		int i = 0;
+		for(i = 0;i < BUFF_NUMBER;i++){
+			rawData[i] = 0;
+		}
 		lastIndex = 0;
 	}else{
 		rawData[lastIndex] = ch;
@@ -63,10 +68,20 @@ void indexAdjust()
 {
 	if(lastIndex > BUFF_NUMBER - 1)lastIndex -= BUFF_NUMBER;
 }
-void buffClear()
-{
-	int i = 0;
-	for(i = 0;i < BUFF_NUMBER;i++){
-		rawData[i] = 0;
-	}
-}
+/* void buffClear() */
+/* { */
+/* 	#<{(| int i = 0; |)}># */
+/* 	#<{(| for(i = 0;i < BUFF_NUMBER;i++){ |)}># */
+/* 	#<{(| 	rawData[i] = 0; |)}># */
+/* 	#<{(| } |)}># */
+/* 	rawData[0] = 0; */
+/* 	rawData[1] = 0; */
+/* 	rawData[2] = 0; */
+/* 	rawData[3] = 0; */
+/* 	rawData[4] = 0; */
+/* 	#<{(| rawData[5] = 0; |)}># */
+/* 	#<{(| rawData[6] = 0; |)}># */
+/* 	#<{(| rawData[7] = 0; |)}># */
+/* 	#<{(| rawData[8] = 0; |)}># */
+/* 	#<{(| rawData[9] = 0; |)}># */
+/* } */
