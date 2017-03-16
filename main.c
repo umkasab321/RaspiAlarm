@@ -49,54 +49,58 @@ char int2dig(char digit)
 	if(0 <= digit && digit <= 9)return digit + '0';
 	else return 0;
 }
-/* The one's digit is B0.
- * The ten's digit is B1.
- * The hundred's digit is B2.
- * The thousand's digit is B3.
+/* ATMEGA168P
+ * The one's digit is C0.
+ * The ten's digit is C1.
+ * The hundred's digit is C2.
+ * The thousand's digit is C3.
  * SER/DS is D2.
  * RCK/STCP is D3.
  * SCK/SHCP is D4.
+ * ENCORDER A is D5.
+ * ENCORDER B is D6.
+ * ENCORDER Switch is D7.
  */
-void init()
-{
-	USARTinit(1200);
-	/* LED7segArray[0] = '5'; */
-	/* LED7segArray[1] = '1'; */
-	/* LED7segArray[2] = '4'; */
-	/* LED7segArray[3] = '8'; */
-//GPIO initilize
-	setOutput(D,3);
-	setOutput(B,0);
-	setOutput(B,1);
-	setOutput(B,2);
-	setOutput(B,3);
-
-	setInput(D,6);
-	setInput(D,4); //ロータリーエンコーダA相
-	setInput(D,5); //ロータリーエンコーダB相
-	setPullUp(D,6);//ロータリーのスイッチ
-	setPullUp(D,4);
-	setPullUp(D,5);
-
-	setOutput(B,4); //SER/DS シリアルデータ入力
-	setOutput(B,5); //RCK/STCP 立ち上がり時に出力
-	setOutput(B,6); //SCK/SHCP 立ち上がり時のデータを記録
-
-	setOutL(B,4);
-	setOutL(B,5);
-	setOutL(B,6);
-
-
-	setOutH(B,0);
-	setOutH(B,1);
-	setOutH(B,2);
-	setOutH(B,3);
-
-
-}
 int main(void)
 {
-	init();
+
+	{
+		USARTinit(1200);
+		/* LED7segArray[0] = '5'; */
+		/* LED7segArray[1] = '1'; */
+		/* LED7segArray[2] = '4'; */
+		/* LED7segArray[3] = '8'; */
+	//GPIO initilize
+		setOutput(D,3);
+		setOutput(C,0);
+		setOutput(C,1);
+		setOutput(C,2);
+		setOutput(C,3);
+
+		setInput(D,5); //ロータリーエンコーダA相
+		setInput(D,6); //ロータリーエンコーダB相
+		setInput(D,7); //ロータリーのスイッチ
+		setPullUp(D,5);
+		setPullUp(D,6);
+		setPullUp(D,7);
+
+		setOutput(D,2); //SER/DS シリアルデータ入力
+		setOutput(D,3); //RCK/STCP 立ち上がり時に出力
+		setOutput(D,4); //SCK/SHCP 立ち上がり時のデータを記録
+
+		setOutL(D,2);
+		setOutL(D,3);
+		setOutL(D,4);
+
+
+		setOutH(C,0);
+		setOutH(C,1);
+		setOutH(C,2);
+		setOutH(C,3);
+
+
+	}
+	/* init(); */
 	sei();
 	DEBUG_PRINT("Heeeeeeeeeelo\r\n");
 	int count = 0;
@@ -117,6 +121,7 @@ int main(void)
 			/* LED7segArray[2] = '5'; */
 			/* LED7segArray[3] = '8'; */
 			showData(LED7segArray);
+			putChar(LED7segArray[0]);
 		}else if(1 <=mode  && mode <= 5){
 			LED7segArray[0] = '0' + alarmTime[0];
 			LED7segArray[1] = '0' + alarmTime[1];
@@ -132,10 +137,10 @@ int main(void)
 		for(i = 0;i<4;i++){
 			dispDigit(dig2int(LED7segArray[i]));
 			if(!chikachika[i]){
-				setOutH(B,i);
+				setOutH(C,i);
 			}
 			_delay_ms(1);
-			setOutL(B,i);
+			setOutL(C,i);
 		}
 
 		int getENCdir = 0;
@@ -165,7 +170,7 @@ int main(void)
 		/* if(count >= 50)setOutL(A, 1); */
 		/* else setOutH(A, 0); */
 		//modeスイッチ
-		if(pushSwitchFlg == 0 && !showInput(D,6))
+		if(pushSwitchFlg == 0 && !showInput(D,7))
 		{
 			pushSwitchFlg = 1;
 			if(1 <= mode && mode <= 4){
